@@ -10,6 +10,13 @@ export const Route = createFileRoute("/")({
     const addTodo = () => {
       if (!input.trim()) return;
       setTodos([...todos, input]);
+      fetch("/api/todos", {
+        method: "POST",
+        body: JSON.stringify({ label: input, done: false }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       setInput("");
     };
 
