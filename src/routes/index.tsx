@@ -15,7 +15,10 @@ export const Route = createFileRoute("/")({
   component: () => {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [input, setInput] = useState<string>("");
-    const [uncommittedActions, setUncommittedActions] = useState<Action[]>([]);
+    const localActions = localStorage.getItem("uncomitted_actions");
+    const [uncommittedActions, setUncommittedActions] = useState<Action[]>(
+      localActions ? JSON.parse(localActions) : []
+    );
 
     useEffect(() => {
       if (!navigator.onLine) {
@@ -47,6 +50,13 @@ export const Route = createFileRoute("/")({
         setUncommittedActions([]);
       }
     }, [navigator.onLine]);
+
+    useEffect(() => {
+      localStorage.setItem(
+        "uncomitted_actions",
+        JSON.stringify(uncommittedActions)
+      );
+    }, [uncommittedActions]);
 
     const addTodo = () => {
       if (!input.trim()) return;
