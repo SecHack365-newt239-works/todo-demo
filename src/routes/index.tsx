@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { createFileRoute } from "@tanstack/react-router";
+import { nanoid } from "nanoid";
 
 export const Route = createFileRoute("/")({
   component: () => {
@@ -10,13 +11,16 @@ export const Route = createFileRoute("/")({
     const addTodo = () => {
       if (!input.trim()) return;
       setTodos([...todos, input]);
-      fetch("/api/todos", {
+      const todoId = nanoid();
+      fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`, {
         method: "POST",
-        body: JSON.stringify({ label: input, done: false }),
+        body: JSON.stringify({ label: input, done: false, id: todoId }),
         headers: {
           "Content-Type": "application/json",
         },
-      });
+      })
+        .then((res) => res.json())
+        .then((result) => console.log(result));
       setInput("");
     };
 
