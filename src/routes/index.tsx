@@ -7,39 +7,81 @@ type Todo = {
   Label: string;
 };
 
+type Action =
+  | { type: "ADD"; label: string }
+  | { type: "DELETE"; index: number };
+
 export const Route = createFileRoute("/")({
   component: () => {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [input, setInput] = useState<string>("");
+    const [uncommittedActions, setUncommittedActions] = useState<Action[]>([]);
 
     useEffect(() => {
-      fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`)
-        .then((res) => res.json())
-        .then((result) => {
-          setTodos(result);
+      if (!navigator.onLine) {
+        fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`)
+          .then((res) => res.json())
+          .then((result) => {
+            setTodos(result);
+          });
+        uncommittedActions.forEach((action) => {
+          if (action.type === "ADD") {
+            fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`, {
+              method: "POST",
+              body: JSON.stringify({ label: action.label, done: false }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((res) => res.json())
+              .then((result) => {
+                setTodos([...todos, { ID: result.ID, Label: action.label }]);
+              });
+          } else if (action.type === "DELETE") {
+            fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo/${action.index}`, {
+              method: "PUT",
+            });
+            setTodos(todos.filter((todo) => todo.ID !== action.index));
+          }
         });
-    }, []);
+        setUncommittedActions([]);
+      }
+    }, [navigator.onLine]);
 
     const addTodo = () => {
       if (!input.trim()) return;
-      fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`, {
-        method: "POST",
-        body: JSON.stringify({ label: input, done: false }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          setTodos([...todos, { ID: result.ID, Label: input }]);
-        });
+      if (navigator.onLine) {
+        fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`, {
+          method: "POST",
+          body: JSON.stringify({ label: input, done: false }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            setTodos([...todos, { ID: result.ID, Label: input }]);
+          });
+      } else {
+        setUncommittedActions([
+          ...uncommittedActions,
+          { type: "ADD", label: input },
+        ]);
+      }
       setInput("");
     };
 
     const removeTodo = (index: number) => {
-      fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo/${index}`, {
-        method: "PUT",
-      });
+      if (navigator.onLine) {
+        fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo/${index}`, {
+          method: "PUT",
+        });
+      } else {
+        setUncommittedActions([
+          ...uncommittedActions,
+          { type: "DELETE", index },
+        ]);
+      }
       setTodos(todos.filter((todo) => todo.ID !== index));
     };
 
