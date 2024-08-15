@@ -1,31 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createFileRoute } from "@tanstack/react-router";
-import { nanoid } from "nanoid";
+
+type Todo = {
+  ID: number;
+  Label: string;
+};
 
 export const Route = createFileRoute("/")({
   component: () => {
-    const [todos, setTodos] = useState<string[]>([]);
+    const [todos, setTodos] = useState<Todo[]>([]);
     const [input, setInput] = useState<string>("");
+
+    useEffect(() => {
+      fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`)
+        .then((res) => res.json())
+        .then((result) => {
+          setTodos(result);
+        });
+    }, []);
 
     const addTodo = () => {
       if (!input.trim()) return;
-      setTodos([...todos, input]);
-      const todoId = nanoid();
       fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`, {
         method: "POST",
-        body: JSON.stringify({ label: input, done: false, id: todoId }),
+        body: JSON.stringify({ label: input, done: false }),
         headers: {
           "Content-Type": "application/json",
         },
       })
         .then((res) => res.json())
-        .then((result) => console.log(result));
+        .then((result) => {
+          setTodos([...todos, { ID: result.ID, Label: input }]);
+        });
       setInput("");
     };
 
     const removeTodo = (index: number) => {
-      setTodos(todos.filter((_, i) => i !== index));
+      fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo/${index}`, {
+        method: "PUT",
+      });
+      setTodos(todos.filter((todo) => todo.ID !== index));
     };
 
     return (
@@ -38,10 +53,10 @@ export const Route = createFileRoute("/")({
         />
         <button onClick={addTodo}>Add ToDo</button>
         <ul>
-          {todos.map((todo, index) => (
-            <li key={index}>
-              {todo}
-              <button onClick={() => removeTodo(index)}>Delete</button>
+          {todos.map((todo) => (
+            <li key={todo.ID}>
+              {todo.Label}
+              <button onClick={() => removeTodo(todo.ID)}>Delete</button>
             </li>
           ))}
         </ul>
