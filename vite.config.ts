@@ -6,6 +6,11 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [TanStackRouterVite(), react()],
+  server: {
+    host: true,
+    strictPort: true,
+    port: 8000,
+  },
   resolve: {
     alias: {
       "#": path.resolve(__dirname, "src"),
