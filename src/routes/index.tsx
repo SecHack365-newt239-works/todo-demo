@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 type Todo = {
-  ID: number;
-  Label: string;
+  id: number;
+  label: string;
 };
 
 type Action =
@@ -38,13 +38,13 @@ export const Route = createFileRoute("/")({
             })
               .then((res) => res.json())
               .then((result) => {
-                setTodos([...todos, { ID: result.ID, Label: action.label }]);
+                setTodos([...todos, { id: result.ID, label: action.label }]);
               });
           } else if (action.type === "DELETE") {
             fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo/${action.index}`, {
               method: "PUT",
             });
-            setTodos(todos.filter((todo) => todo.ID !== action.index));
+            setTodos(todos.filter((todo) => todo.id !== action.index));
           }
         });
         setUncommittedActions([]);
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/")({
         })
           .then((res) => res.json())
           .then((result) => {
-            setTodos([...todos, { ID: result.ID, Label: input }]);
+            setTodos([...todos, { id: result.ID, label: input }]);
           });
       } else {
         setUncommittedActions([
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/")({
           { type: "DELETE", index },
         ]);
       }
-      setTodos(todos.filter((todo) => todo.ID !== index));
+      setTodos(todos.filter((todo) => todo.id !== index));
     };
 
     return (
@@ -106,9 +106,9 @@ export const Route = createFileRoute("/")({
         <button onClick={addTodo}>Add ToDo</button>
         <ul>
           {todos.map((todo) => (
-            <li key={todo.ID}>
-              {todo.Label}
-              <button onClick={() => removeTodo(todo.ID)}>Delete</button>
+            <li key={todo.id}>
+              {todo.label}
+              <button onClick={() => removeTodo(todo.id)}>Delete</button>
             </li>
           ))}
         </ul>
