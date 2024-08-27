@@ -38,7 +38,7 @@ export const Route = createFileRoute("/")({
             })
               .then((res) => res.json())
               .then((result) => {
-                setTodos([...todos, { id: result.ID, label: action.label }]);
+                setTodos([...todos, { id: result.id, label: action.label }]);
               });
           } else if (action.type === "DELETE") {
             fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo/${action.index}`, {
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/")({
         })
           .then((res) => res.json())
           .then((result) => {
-            setTodos([...todos, { id: result.ID, label: input }]);
+            setTodos([...todos, { id: result.id, label: input }]);
           });
       } else {
         setUncommittedActions([
@@ -108,7 +108,7 @@ export const Route = createFileRoute("/")({
         <ul>
           {todos.map((todo) => (
             <li key={todo.id}>
-              {todo.label}
+              {todo.id}: {todo.label}
               <button onClick={() => removeTodo(todo.id)}>Delete</button>
             </li>
           ))}
