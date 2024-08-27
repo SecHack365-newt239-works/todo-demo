@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
     );
 
     useEffect(() => {
-      if (!navigator.onLine) {
+      if (navigator.onLine) {
         fetch(`${import.meta.env.VITE_BACKEND_URL!}/todo`)
           .then((res) => res.json())
           .then((result) => {
@@ -98,6 +98,7 @@ export const Route = createFileRoute("/")({
     return (
       <div>
         <h1>ToDo App</h1>
+        <div>現在 {navigator.onLine ? "オンライン" : "オフライン"}</div>
         <input
           onChange={(e) => setInput(e.target.value)}
           type="text"
